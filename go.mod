@@ -1,10 +1,10 @@
 module github.com/goupdate/sortedslice
 
-go 1.23.6
+go 1.25.5
 
 require (
-	github.com/stretchr/testify v1.10.0
-	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
+	github.com/stretchr/testify v1.11.1
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
 )
 
 require (
