@@ -169,19 +169,6 @@ func (ss *SortedSlice[K, V]) Range(f func(k K, v V) bool) {
 	}
 }
 
-// Range iterates over all key-value pairs in the slice but iterates backwards
-func (ss *SortedSlice[K, V]) RangeBackward(f func(k K, v V) bool) {
-	ss.RLock()
-	defer ss.RUnlock()
-
-	for i := 0; i < len(ss.data); i++ {
-		kv := ss.data[len(ss.data)-i-1]
-		if !f(kv.Key, kv.Value) {
-			break
-		}
-	}
-}
-
 // First returns the first element in the slice.
 func (ss *SortedSlice[K, V]) First() V {
 	ss.RLock()
@@ -248,4 +235,44 @@ func (ss *SortedSlice[K, V]) MinKey() K {
 // MaxKey is an alias for LastKey.
 func (ss *SortedSlice[K, V]) MaxKey() K {
 	return ss.LastKey()
+}
+
+func (ss *SortedSlice[K, V]) LowerBound(key K) (K, V, bool) {
+	ss.RLock()
+	defer ss.RUnlock()
+
+	if len(ss.data) == 0 {
+		var zeroK K
+		var zeroV V
+		return zeroK, zeroV, false
+	}
+
+	index := sort.Search(len(ss.data), func(i int) bool {
+		return ss.data[i].Key >= key
+	})
+
+	if index > 0 {
+		kv := ss.data[index-1]
+		return kv.Key, kv.Value, true
+	}
+
+	var zeroK K
+	var zeroV V
+	return zeroK, zeroV, false
+}
+
+func (ss *SortedSlice[K, V]) RangeBackward(f func(k K, v V) bool) {
+	ss.RLock()
+	defer ss.RUnlock()
+
+	l := len(ss.data)
+	if l == 0 {
+		return
+	}
+	for i := l - 1; i >= 0; i-- {
+		kv := ss.data[i]
+		if !f(kv.Key, kv.Value) {
+			break
+		}
+	}
 }
